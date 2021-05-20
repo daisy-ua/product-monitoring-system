@@ -1,5 +1,5 @@
 import scrapy
-from crawling.crawling.items import MichaelsProduct
+from crawling.crawling.items import MichaelsProduct, MichaelsCategory
 
 
 def parse_product(response):
@@ -9,7 +9,7 @@ def parse_product(response):
     item['price'] = str(response.xpath("//div[contains(@class, 'product-sales-price')]/text()").get()).strip()
     item['desc'] = str(response.xpath("//div[@class='productshortDescriptions ']/text()").get()).strip()
     item['img_path'] = response.xpath("//div[@id='gal_01']/a/img/@src").get()
-    item['category'] = response.meta['category-path']
+    item['category'] = [response.meta['category-node']['_id']]
     item['url'] = response.url
     yield item
 
@@ -28,11 +28,18 @@ class MichaelsSpider(scrapy.Spider):
                 category_name = str(category.xpath('.//text()').get()).strip()
                 link = category.xpath(".//@href").get()
                 absolute_path = self.domain + link
+
+                category_node = MichaelsCategory()
+                category_node['parent'] = "root"
+                category_node['tree'] = ['root']
+                category_node['_id'] = category_name
+                yield category_node
+
                 yield scrapy.Request(absolute_path, callback=self.parse_subcategory, meta={
                     'level': '2',
-                    'category-path': [category_name]
+                    'category-path': [category_name],
+                    'category-node': category_node
                 })
-                break
         except Exception as err:
             print('Exception occurred: {0}'.format(err))
 
@@ -41,13 +48,22 @@ class MichaelsSpider(scrapy.Spider):
         categories = response.xpath("//ul[contains(@class, 'category-level-%s')]/li/a" % level)
 
         if categories:
+            category_node = response.meta['category-node']
+            category_node['parent'] = category_node['_id']
+            category_node['tree'] += [category_node['_id']]
+
             for category in categories:
                 name = str(category.xpath(".//text()").get()).strip()
                 link = category.xpath(".//@href").get()
                 absolute_path = self.domain + link
+
+                category_node['_id'] = name
+                yield category_node
+
                 yield scrapy.Request(absolute_path, self.parse_subcategory, meta={
                     'level': str(int(level) + 1),
-                    'category-path': response.meta['category-path'] + [name]
+                    'category-path': response.meta['category-path'] + [name],
+                    'category-node': category_node
                 })
         else:
             for page in self.parse_product_page(response):

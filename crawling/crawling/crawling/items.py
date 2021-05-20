@@ -16,3 +16,7 @@ class MichaelsProduct(scrapy.Item):
     url = scrapy.Field()
 
 
+class MichaelsCategory(scrapy.Item):
+    _id = scrapy.Field()
+    tree = scrapy.Field()
+    parent = scrapy.Field()
