@@ -1,7 +1,8 @@
 import pymongo
 from scrapy.utils.project import get_project_settings
 from scrapy.exceptions import DropItem
-from crawling.crawling.items import MichaelsProduct, MichaelsCategory
+from .items import MichaelsProduct, MichaelsCategory
+from crawling.generator import generate_sale_history
 
 
 class MongoDBPipeline(object):
@@ -15,6 +16,12 @@ class MongoDBPipeline(object):
         db = connection[settings['MONGODB_DB']]
         self.products = db[settings['MONGODB_PRODUCT_COLLECTION']]
         self.categories = db[settings['MONGODB_CATEGORY_COLLECTION']]
+        self.sales = db[settings['MONGODB_SALES_COLLECTION']]
+
+    def close_spider(self, spider):
+        for product in self.products.find():
+            sales = generate_sale_history(product['item_id'], product['price'])
+            self.sales.find_one_and_update({'_id': product['item_id']}, {'$set': dict(sales)}, upsert=True)
 
     def process_item(self, item, spider):
         for data in item:
@@ -29,7 +36,7 @@ class MongoDBPipeline(object):
         return item
 
     def __process_category_item(self, item):
-        self.categories.update({'_id': item['_id']}, dict(item), upsert=True)
+        self.categories.update({'_id': item['_id']}, {'$set': dict(item)}, upsert=True)
 
     def __process_product_item(self, item):
         product = self.products.find_one({'item_id': item['item_id']})
@@ -38,4 +45,4 @@ class MongoDBPipeline(object):
             return
         if product['category'] != item['category']:
             product['category'] += item['category']
-        self.products.update_one({'item_id': item['item_id']}, dict(product))
+        self.products.update_one({'item_id': item['item_id']}, {'$set': dict(product)}, upsert=True)

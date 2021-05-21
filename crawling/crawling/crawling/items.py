@@ -6,6 +6,7 @@ class MichaelsProduct(scrapy.Item):
     name = scrapy.Field()
     desc = scrapy.Field()
     price = scrapy.Field()
+    currency = scrapy.Field()
     img_path = scrapy.Field()
     category = scrapy.Field()
     url = scrapy.Field()

@@ -1,12 +1,14 @@
 import scrapy
-from crawling.crawling.items import MichaelsProduct, MichaelsCategory
+from ..items import MichaelsProduct, MichaelsCategory
 
 
 def parse_product(response):
     item = MichaelsProduct()
     item['item_id'] = response.meta['data-id']
     item['name'] = response.xpath("//h1[@class = 'product-name clearfix']/text()").get()
-    item['price'] = str(response.xpath("//div[contains(@class, 'product-sales-price')]/text()").get()).strip()
+    price_item = str(response.xpath("//div[contains(@class, 'product-sales-price')]/text()").get()).strip()
+    item['price'] = price_item[1:].replace(',', '')
+    item['currency'] = price_item[0]
     item['desc'] = str(response.xpath("//div[@class='productshortDescriptions ']/text()").get()).strip()
     item['img_path'] = response.xpath("//div[@id='gal_01']/a/img/@src").get()
     item['category'] = [response.meta['category-node']['_id']]

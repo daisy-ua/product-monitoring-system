@@ -16,13 +16,14 @@ ITEM_PIPELINES = {
     'crawling.pipelines.MongoDBPipeline': 300,
 }
 
-DOWNLOAD_DELAY = 5
+DOWNLOAD_DELAY = 3
 
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017
 MONGODB_DB = "catalog"
 MONGODB_CATEGORY_COLLECTION = "categories"
 MONGODB_PRODUCT_COLLECTION = "products"
+MONGODB_SALES_COLLECTION = "sales"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'crawling (+http://www.yourdomain.com)'
