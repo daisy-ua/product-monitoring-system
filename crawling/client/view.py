@@ -1,12 +1,15 @@
+from crawling.crawling.spiders.michaels import run
 from client.controllers.controller import Controller
 
 GENERATE_DATA = 1
 GET_PRODUCTS = 2
+START_ANALYSIS = 3
 BACK = 0
 
 menu_option = [
     '1. start scrapy',
     '2. get products',
+    '3. start analysis',
     '0. quit'
 ]
 
@@ -22,39 +25,87 @@ class View:
             option = int(input("----> "))
 
             if option == GENERATE_DATA:
-                pass
+                run()
 
             if option == GET_PRODUCTS:
-                self.get_products_menu()
+                self.get_categories_menu(self.get_products)
+
+            if option == START_ANALYSIS:
+                self.start_analysis()
 
             if option == BACK:
                 break
 
-            continue
+    def get_products(self, category_name):
+        products = self.controller.get_all_products_for_category(category_name)
 
-    def get_products_menu(self):
+        if len(products) == 0:
+            print_message('No products found for this category!')
+            return None
+        print_enumerated_list(products, 'name')
+        return products
+
+    def get_categories_menu(self, callback):
+        categories = self.controller.get_parent_categories()
         while True:
-            categories = list(self.controller.get_all_items())
             print_message('Select category. Press 0 to exit!')
             print_enumerated_list(categories, '_id')
 
             option = int(input('----> '))
 
+            if option == BACK:
+                break
+
             if option > len(categories):
                 print_message("Out of index! Try again.")
                 continue
 
+            category_name = categories[option - 1]['_id']
+            sub_categories = self.controller.get_parent_categories(category_name)
+            if len(sub_categories) != 0:
+                categories = sub_categories
+                continue
+
+            return callback(category_name)
+
+    def start_analysis(self):
+        menu = [
+            '1. get category ranking by sales',
+            '2. get average prices for category',
+            '3. get price prediction',
+            '0. back'
+        ]
+
+        while True:
+            print_initial(menu, 'Select analysis option')
+            option = int(input('----> '))
+
+            if option == 1:
+                self.get_category_ranking()
+
+            if option == 2:
+                self.get_categories_menu(self.get_average_prices_by_category)
+
+            if option == 3:
+                self.get_price_prediction()
+
             if option == BACK:
                 break
 
-            category_name = categories[option - 1]['_id']
-            products = self.controller.get_all_products_for_category(category_name)
+    def get_category_ranking(self):
+        self.controller.get_category_ranking()
 
-            if len(products) == 0:
-                print_message('No products found for this category!')
-            print_enumerated_list(products, 'name')
+    def get_average_prices_by_category(self, category_name):
+        if self.controller.get_average_prices_by_category(category_name):
+            print('Success!')
 
-            break
+    def get_price_prediction(self):
+        products = self.get_categories_menu(self.get_products)
+        if products is None:
+            return
+        option = int(input('----> '))
+        if self.controller.get_price_prediction(products[option - 1]['item_id']):
+            print('Success!')
 
 
 def print_enumerated_list(items, key):

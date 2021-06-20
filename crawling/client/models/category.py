@@ -9,5 +9,8 @@ class Category:
     def get_descendants_items(self, parent_node):
         return self.model.find({'tree': parent_node})
 
+    def get_parent_nodes(self, parent):
+        return self.model.find({'parent': parent})
+
 
 
