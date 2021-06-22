@@ -2,7 +2,7 @@ import pymongo
 from scrapy.utils.project import get_project_settings
 from scrapy.exceptions import DropItem
 from .items import MichaelsProduct, MichaelsCategory
-from crawling.generator import generate_sale_history
+from crawling.crawling.generator import generate_sale_history
 
 
 class MongoDBPipeline(object):

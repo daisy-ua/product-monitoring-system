@@ -3,7 +3,7 @@ import random
 
 
 def generate_sale_history(product_id, product_price):
-    purchase_num = random.randint(1, 100)
+    purchase_num = random.randint(1, 200)
     sales = []
     dates = []
 

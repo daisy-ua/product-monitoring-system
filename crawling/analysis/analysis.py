@@ -47,8 +47,6 @@ def get_category_ranking(_sales, _products):
         ascending=False
     ).reset_index()
 
-    top_sold_categories = top_sold_categories[:10]
-
     plt.style.use('fivethirtyeight')
     plt.figure(figsize=(16, 8))
 
@@ -81,11 +79,10 @@ def get_average_prices_by_category(history, products, category):
     plt.figure(figsize=(16, 8))
 
     prices = pd.to_numeric(pr_df['price'])
-    ax.set(xlim=(0, prices.max()))
-    plot = sns.distplot(prices, ax=ax)
-
+    plot = sns.distplot(prices)
+    plot.figure.savefig('analysis/charts/average_prices.png')
     paid_prices = pd.to_numeric(ht_df['sell_price'])
-    plot = sns.distplot(paid_prices, ax=ax)
+    plot = sns.distplot(paid_prices)
     ax.set_xlabel('Price', fontsize=18)
     ax.set_ylabel('', fontsize=18)
     plt.title('Model')

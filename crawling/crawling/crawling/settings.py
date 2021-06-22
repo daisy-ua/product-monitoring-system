@@ -9,11 +9,11 @@
 
 BOT_NAME = 'crawling'
 
-SPIDER_MODULES = ['crawling.spiders']
-NEWSPIDER_MODULE = 'crawling.spiders'
+SPIDER_MODULES = ['crawling.crawling.spiders']
+NEWSPIDER_MODULE = 'crawling.crawling.spiders'
 
 ITEM_PIPELINES = {
-    'crawling.pipelines.MongoDBPipeline': 300,
+    'crawling.crawling.pipelines.MongoDBPipeline': 300,
 }
 
 DOWNLOAD_DELAY = 3
