@@ -1,7 +1,6 @@
 import os
 
 import scrapy
-from scrapy.crawler import CrawlerProcess
 from subprocess import Popen
 import shlex
 
@@ -48,7 +47,6 @@ class MichaelsSpider(scrapy.Spider):
                     'category-path': [category_name],
                     'category-node': category_node
                 })
-                break
         except Exception as err:
             print('Exception occurred: {0}'.format(err))
 
@@ -90,9 +88,9 @@ class MichaelsSpider(scrapy.Spider):
             response.meta['data-id'] = data_id
             yield scrapy.Request(absolute_path, callback=parse_product, meta=response.meta)
 
-        # next_page_link = response.xpath("//ul/div[@class='mobile_pagination']/a[@class='page-next']/@href").get()
-        # if next_page_link:
-        #     yield scrapy.Request(next_page_link, callback=self.parse_product_page, meta=response.meta)
+        next_page_link = response.xpath("//ul/div[@class='mobile_pagination']/a[@class='page-next']/@href").get()
+        if next_page_link:
+            yield scrapy.Request(next_page_link, callback=self.parse_product_page, meta=response.meta)
 
 
 def run():
